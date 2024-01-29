@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Racer</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <iframe id="mazeFrame" src="hedg.html" width="100%" height="100%" style="display: none;"></iframe>
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const mazeFrame = document.getElementById("mazeFrame");
+        const ctx = canvas.getContext("2d");
+
+        const scene = {
+            ground: {
+                y: canvas.height - 20,
+                height: 20,
+                color: "#654321", // Brown
+            },
+            sky: {
+                y: 0,
+                height: canvas.height - 20,
+                color: "#87CEEB", // Sky Blue
+            },
+        };
+
+        const player = {
+            x: canvas.width / 2 - 15, // Initial x position
+            y: canvas.height - 40, // Initial y position
+            width: 30, // Width of the player box
+            height: 30, // Height of the player box
+            color: "#87C90B", // White
+            speed: 5, // Player movement speed
+        };
+
+        const maze = [
+            { x: 50, y: 50, width: 20, height: 300 },
+            { x: 150, y: 50, width: 20, height: 300 },
+            { x: 250, y: 50, width: 20, height: 300 },
+            { x: 350, y: 50, width: 20, height: 300 },
+            { x: 450, y: 50, width: 20, height: 300 },
+            { x: 50, y: 50, width: 400, height: 20 },
+            { x: 50, y: 150, width: 400, height: 20 },
+            { x: 50, y: 250, width: 400, height: 20 },
+            { x: 50, y: 350, width: 400, height: 20 },
+            // Add more walls as needed
+        ];
+
+        const hedgeImage = new Image();
+        hedgeImage.src = 'hedge.png'; // Image representing the maze walls
+
+        const keys = {
+            left: false,
+            right: false
+        };
+
+        window.addEventListener("gamepadconnected", (event) => {
+            const gamepad = event.gamepad;
+            console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.",
+                gamepad.index, gamepad.id,
+                gamepad.buttons.length, gamepad.axes.length);
+        });
+
+        window.addEventListener("gamepaddisconnected", (event) => {
+            const gamepad = event.gamepad;
+            console.log("Gamepad disconnected from index %d: %s", gamepad.index, gamepad.id);
+        });
+
+        if ('getGamepads' in navigator) {
+            // Gamepad API is supported
+            // Proceed with setting up game controllers
+            initializeGame();
+        } else {
+            // Gamepad API is not supported
+            console.log("Gamepad API is not supported in this browser.");
+        }
+
+        function initializeGame() {
+            // Example: Start the game loop
+            startGameLoop();
+
+            // Add event listeners for gamepad button presses
+            window.addEventListener("gamepadconnected", handleGamepadConnected);
+            window.addEventListener("gamepaddisconnected", handleGamepadDisconnected);
+        }
+
+        function handleGamepadConnected(event) {
+            const gamepad = event.gamepad;
+            console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.",
+                gamepad.index, gamepad.id,
+                gamepad.buttons.length, gamepad.axes.length);
+
+            // Start checking for button presses
+            checkGamepadButtons();
+        }
+
+        function handleGamepadDisconnected(event) {
+            const gamepad = event.gamepad;
+            console.log("Gamepad disconnected from index %d: %s", gamepad.index, gamepad.id);
+
+            // Stop checking for button presses
+            stopCheckingGamepadButtons();
+        }
+
+        function checkGamepadButtons() {
+            // Example: Continue polling for gamepad updates
+            requestAnimationFrame(checkGamepadButtons);
+
+            // Get the first connected gamepad
+            const gamepad = navigator.getGamepads()[0];
+
+            // Check which buttons are pressed
+            if (gamepad) {
+                // Button 4 corresponds to the left button
+                if (gamepad.buttons[1].pressed) {
+                    showMaze();
+                }
+
+                // Button 1 corresponds to the A button
+                if (gamepad.buttons[0].pressed) {
+                    showGameCanvas();
+                }
+            }
+        }
+
+        function stopCheckingGamepadButtons() {
+            // Example: Stop polling for gamepad updates
+            cancelAnimationFrame(checkGamepadButtons);
+        }
+
+        function showMaze() {
+            mazeFrame.style.display = "block";
+            canvas.style.display = "none";
+        }
+
+        function showGameCanvas() {
+            mazeFrame.style.display = "none";
+            canvas.style.display = "block";
+        }
+
+        function startGameLoop() {
+            // Example: Start the game loop
+            render();
+        }
+
+        function render() {
+            // Clear the canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw the ground
+            ctx.fillStyle = scene.ground.color;
+            ctx.fillRect(0, scene.ground.y, canvas.width, scene.ground.height);
+
+            // Draw the sky
+            ctx.fillStyle = scene.sky.color;
+            ctx.fillRect(0, scene.sky.y, canvas.width, scene.sky.height);
+
+            // Draw the player
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+
+            // Draw the maze walls using the hedge image
+            for (const wall of maze) {
+                ctx.drawImage(hedgeImage, wall.x, wall.y, wall.width, wall.height);
+            }
+
+            // Update the player position based on gamepad input
+            if (keys.left && player.x > 0) {
+                player.x -= player.speed;
+            }
+
+            if (keys.right && player.x + player.width < canvas.width) {
+                player.x += player.speed;
+            }
+
+            // Check for collisions with maze walls
+            checkCollisions();
+
+            // Continue the game loop
+            requestAnimationFrame(render);
+        }
+
+        function checkCollisions() {
+            for (const wall of maze) {
+                if (
+                    player.x < wall.x + wall.width &&
+                    player.x + player.width > wall.x &&
+                    player.y < wall.y + wall.height &&
+                    player.y + player.height > wall.y
+                ) {
+                    // Collision detected, reset player position
+                    player.x = canvas.width / 2 - player.width / 2;
+                    player.y = canvas.height - 40;
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
