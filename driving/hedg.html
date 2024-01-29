@@ -2,12 +2,13 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">Q
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bird's Eye View of a Hedge Maze</title>
+    <title>Quantum Racer</title>
     <style>
         body {
             margin: 0;
+            overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -15,8 +16,15 @@
             background-color: #e6f7ff;
         }
 
-        .maze {
+        .maze-container {
             position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .maze {
+            position: absolute;
             width: 400px;
             height: 400px;
             background-color: #3d3d3d;
@@ -24,16 +32,18 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         }
 
-        .hedgeVert {
+        .hedgeVert,
+        .hedgeHor {
             position: absolute;
             background-color: #006400;
+        }
+
+        .hedgeVert {
             width: 20px;
             height: 100px;
         }
 
         .hedgeHor {
-            position: absolute;
-            background-color: #006400;
             width: 100px;
             height: 20px;
         }
@@ -54,55 +64,266 @@
             left: 20px;
         }
 
-        /* Maze Structure */
+        .player {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background-color: #ff0000;
+            border-radius: 50%;
+            transition: 0.2s;
+
+        }
+
+        .goal {
+            position: relative;
+            width: 10px;
+            height: 10px;
+            background-color: #3498db;
+            /* Use your desired shade of blue */
+            transform: rotate(45deg);
+        }
+
+        .enemy {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background-color: #00ff00;
+            /* Green color for the enemy */
+            border-radius: 50%;
+            transition: 0.2s;
+        }
     </style>
 </head>
 
 <body>
-    <div class="maze">
-        <!-- Vert -->
-        <div class="hedgeVert" style="left: 0px; top: 25px;"></div>
-        <div class="hedgeVert" style="left: 125px;"></div>
-        <div class="hedgeVert" style="left: 0px; top: 150px;"></div>
-        <div class="hedgeVert" style="left: 50px; top: 150px;"></div>
-        <div class="hedgeVert" style="left: 200px; top: 25px;"></div>
-        <div class="hedgeVert" style="left: 325px; top: 50px;"></div>
-      
-      
-        <!-- Horz -->
-        <div class="hedgeHor" style="left: 45px; top: 100px;"></div>
-        <div class="hedgeHor" style="left: 0px; top: 25px;"></div>
-        <div class="hedgeHor" style="left: 275px; top: 100px;"></div>
-        <div class="hedgeHor" style="left: 170px; top: 25px;"></div>
-        <div class="hedgeHor" style="left: 145px; top: 75px;"></div>
+    <div class="maze-container">
+        <canvas id="gameCanvas"></canvas>
+        <div class="maze">
+            <!-- Vert -->
+            <!-- Vert -->
+            <div class="hedgeVert" style="left: 0px; top: 25px;"></div>
+            <div class="hedgeVert" style="left: 125px;"></div>
+            <div class="hedgeVert" style="left: 0px; top: 150px;"></div>
+            <div class="hedgeVert" style="left: 50px; top: 150px;"></div>
+            <div class="hedgeVert" style="left: 200px; top: 25px;"></div>
+            <div class="hedgeVert" style="left: 325px; top: 50px;"></div>
 
-        <!-- box 1-->
-        <div class="hedgeHor" style="left: 100px; top: 150px;"></div>
-        <div class="hedgeHor" style="left: 100px; top: 230px;"></div>
-        <div class="hedgeVert" style="left: 200px; top: 150px;"></div>
-        <div class="hedgeVert" style="left: 100px; top: 150px;"></div>
-        <!-- box 2-->
-        <div class="hedgeHor" style="left: 250px; top: 150px;"></div>
-        <div class="hedgeHor" style="left: 250px; top: 230px;"></div>
-        <div class="hedgeVert" style="left: 250px; top: 150px;"></div>
-        <div class="hedgeVert" style="left: 350px; top: 150px;"></div>
-         <!-- box 3-->
-         <div class="hedgeHor" style="left: 250px; top: 275px"></div>
-         <div class="hedgeHor" style="left: 250px; top: 355px;"></div>
-         <div class="hedgeVert" style="left: 250px; top: 275px;"></div>
-         <div class="hedgeVert" style="left: 350px; top: 275px;"></div>
-         <!-- box 4-->
-         <div class="hedgeHor" style="left: 100px; top: 275px"></div>
-         <div class="hedgeHor" style="left: 100px; top: 355px;"></div>
-         <div class="hedgeVert" style="left: 200px; top: 275px;"></div>
-         <div class="hedgeVert" style="left: 100px; top: 275px;"></div>
+            <!-- Horz -->
+            <div class="hedgeHor" style="left: 45px; top: 100px;"></div>
+            <div class="hedgeHor" style="left: 0px; top: 25px;"></div>
+            <div class="hedgeHor" style="left: 275px; top: 100px;"></div>
+            <div class="hedgeHor" style="left: 170px; top: 25px;"></div>
+            <div class="hedgeHor" style="left: 145px; top: 75px;"></div>
 
-         <div class="hedgeVert" style="left: 50px; top: 300px;"></div>
-         <div class="hedgeVert" style="left: 000px; top: 300px;"></div>
+            <!-- box 1-->
+            <div class="hedgeHor" style="left: 100px; top: 150px;"></div>
+            <div class="hedgeHor" style="left: 100px; top: 230px;"></div>
+            <div class="hedgeVert" style="left: 200px; top: 150px;"></div>
+            <div class="hedgeVert" style="left: 100px; top: 150px;"></div>
+            <!-- box 2-->
+            <div class="hedgeHor" style="left: 250px; top: 150px;"></div>
+            <div class="hedgeHor" style="left: 250px; top: 230px;"></div>
+            <div class="hedgeVert" style="left: 250px; top: 150px;"></div>
+            <div class="hedgeVert" style="left: 350px; top: 150px;"></div>
+            <!-- box 3-->
+            <div class="hedgeHor" style="left: 250px; top: 275px"></div>
+            <div class="hedgeHor" style="left: 250px; top: 355px;"></div>
+            <div class="hedgeVert" style="left: 250px; top: 275px;"></div>
+            <div class="hedgeVert" style="left: 350px; top: 275px;"></div>
+            <!-- box 4-->
+            <div class="hedgeHor" style="left: 100px; top: 275px"></div>
+            <div class="hedgeHor" style="left: 100px; top: 355px;"></div>
+            <div class="hedgeVert" style="left: 200px; top: 275px;"></div>
+            <div class="hedgeVert" style="left: 100px; top: 275px;"></div>
 
-         <div class="hedgeHor" style="left: 00px; top: 230px;"></div>
-      
+            <div class="hedgeVert" style="left: 50px; top: 300px;"></div>
+            <div class="hedgeVert" style="left: 0px; top: 300px;"></div>
+
+            <div class="hedgeHor" style="left: 0px; top: 230px;"></div>
+
+            <!-- Player -->
+            <div class="player" id="player"></div>
+            <div class="goal" style="left: 180px; top: 60px;"></div>
+
+            <div class="enemy" id="enemy"></div>
+        </div>
     </div>
+
+    <script>
+        // Your existing gamepad-related code with player-related functions
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        const player = document.getElementById("player");
+        const enemy = document.getElementById("enemy");
+
+        let playerX = 0;
+        let playerY = 385;
+        let enemyX = 200;
+        let enemyY = 200;
+
+        window.addEventListener("gamepadconnected", (event) => {
+            const gamepad = event.gamepad;
+            console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.",
+                gamepad.index, gamepad.id,
+                gamepad.buttons.length, gamepad.axes.length);
+        });
+
+        window.addEventListener("gamepaddisconnected", (event) => {
+            const gamepad = event.gamepad;
+            console.log("Gamepad disconnected from index %d: %s", gamepad.index, gamepad.id);
+            stopCheckingGamepadButtons();
+        });
+
+        if ('getGamepads' in navigator) {
+            initializeGame();
+        } else {
+            console.log("Gamepad API is not supported in this browser.");
+        }
+
+        function initializeGame() {
+            startGameLoop();
+            window.addEventListener("gamepadconnected", handleGamepadConnected);
+            window.addEventListener("gamepaddisconnected", handleGamepadDisconnected);
+            checkGamepadButtons();
+            moveEnemy(); // Added function to move the enemy
+        }
+
+        function handleGamepadConnected(event) {
+            const gamepad = event.gamepad;
+            console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.",
+                gamepad.index, gamepad.id,
+                gamepad.buttons.length, gamepad.axes.length);
+        }
+
+        function handleGamepadDisconnected(event) {
+            const gamepad = event.gamepad;
+            console.log("Gamepad disconnected from index %d: %s", gamepad.index, gamepad.id);
+            stopCheckingGamepadButtons();
+        }
+
+        function checkGamepadButtons() {
+            requestAnimationFrame(checkGamepadButtons);
+            const gamepad = navigator.getGamepads()[0];
+
+            if (gamepad) {
+                // Calculate the new position
+                let newPlayerX = playerX;
+                let newPlayerY = playerY;
+
+                if (gamepad.buttons[12].pressed) {
+                    newPlayerY -= 1; // Move up
+                }
+                if (gamepad.buttons[13].pressed) {
+                    newPlayerY += 1; // Move down
+                }
+                if (gamepad.buttons[14].pressed) {
+                    newPlayerX -= 1; // Move left
+                }
+                if (gamepad.buttons[15].pressed) {
+                    newPlayerX += 1; // Move right
+                }
+
+                // Check for collisions with maze boundaries
+                if (newPlayerX < 0) {
+                    newPlayerX = 0;
+                } else if (newPlayerX > 400 - 20) {
+                    newPlayerX = 400 - 20;
+                }
+
+                if (newPlayerY < 0) {
+                    newPlayerY = 0;
+                } else if (newPlayerY > 400 - 20) {
+                    newPlayerY = 400 - 20;
+                }
+
+                // Check for collisions with hedgeVert and hedgeHor
+                const hedges = document.querySelectorAll('.hedgeVert, .hedgeHor');
+                hedges.forEach((hedge) => {
+                    const hedgeRect = hedge.getBoundingClientRect();
+                    const playerRect = player.getBoundingClientRect();
+
+                    const isColliding = (
+                        playerRect.right > hedgeRect.left &&
+                        playerRect.left < hedgeRect.right &&
+                        playerRect.bottom > hedgeRect.top &&
+                        playerRect.top < hedgeRect.bottom
+                    );
+
+                    // Check for collisions considering the size of the hedge
+                    if (isColliding) {
+                        const horizontalCollision = (
+                            playerRect.left < hedgeRect.right &&
+                            playerRect.right > hedgeRect.left
+                        );
+
+                        const verticalCollision = (
+                            playerRect.top < hedgeRect.bottom &&
+                            playerRect.bottom > hedgeRect.top
+                        );
+
+                        // Adjust player position based on the direction of collision
+                        if (horizontalCollision) {
+                            if (playerRect.left < hedgeRect.left) {
+                                newPlayerX = hedgeRect.left - playerRect.width;
+                            } else {
+                                newPlayerX = hedgeRect.right;
+                            }
+                        }
+
+                        if (verticalCollision) {
+                            if (playerRect.top < hedgeRect.top) {
+                                newPlayerY = hedgeRect.top - playerRect.height;
+                            } else {
+                                newPlayerY = hedgeRect.bottom;
+                            }
+                        }
+                    }
+                });
+
+                // Update player position
+                player.style.transform = `translate(${newPlayerX}px, ${newPlayerY}px)`;
+                playerX = newPlayerX;
+                playerY = newPlayerY;
+
+                // Check for goal collision
+                checkGoalCollision();
+            }
+        }
+
+        function stopCheckingGamepadButtons() {
+            cancelAnimationFrame(checkGamepadButtons);
+        }
+
+        function startGameLoop() {
+            // Your existing game loop-related code
+            render();
+        }
+
+        function render() {
+            // Your existing rendering code
+            requestAnimationFrame(render);
+        }
+
+        function moveEnemy() {
+            // Function to move the enemy towards the player
+            setInterval(() => {
+                const speed = 2;
+                const deltaX = playerX - enemyX;
+                const deltaY = playerY - enemyY;
+                const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+                const ratio = speed / distance;
+                const moveX = ratio * deltaX;
+                const moveY = ratio * deltaY;
+
+                enemyX += moveX;
+                enemyY += moveY;
+
+                // Update enemy position
+                enemy.style.transform = `translate(${enemyX}px, ${enemyY}px)`;
+            }, 16); // Update every 16 milliseconds
+        }
+    </script>
 </body>
 
 </html>
